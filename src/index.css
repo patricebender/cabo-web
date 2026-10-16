@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-slate-100 text-slate-900 antialiased;
+    @apply dark:bg-slate-950 dark:text-slate-100;
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Account for iOS safe areas when added to home screen. */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* Hide number-input spinners — we use a plain numeric field. */
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-semibold transition
+      active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-primary {
+    @apply btn bg-gradient-to-br from-cabo-500 to-cabo-700 text-white shadow-lg shadow-cabo-600/30
+      hover:from-cabo-500 hover:to-cabo-600;
+  }
+  .btn-ghost {
+    @apply btn bg-white/70 text-slate-700 ring-1 ring-slate-200 hover:bg-white
+      dark:bg-white/5 dark:text-slate-200 dark:ring-white/10 dark:hover:bg-white/10;
+  }
+  .btn-danger {
+    @apply btn bg-rose-500 text-white shadow-lg shadow-rose-500/30 hover:bg-rose-600;
+  }
+  .card {
+    @apply rounded-3xl bg-white/80 p-4 shadow-sm ring-1 ring-slate-200/70 backdrop-blur
+      dark:bg-white/[0.04] dark:ring-white/10;
+  }
+  .field {
+    @apply w-full rounded-2xl border-0 bg-slate-100 px-4 py-3 text-lg font-medium text-slate-900
+      ring-1 ring-inset ring-slate-200 outline-none transition placeholder:text-slate-400
+      focus:ring-2 focus:ring-cabo-500
+      dark:bg-white/5 dark:text-slate-100 dark:ring-white/10;
+  }
+}

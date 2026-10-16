@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/usegame.ts","./src/components/modal.tsx","./src/components/scorebadge.tsx","./src/components/icons.tsx","./src/game/engine.test.ts","./src/game/engine.ts","./src/game/round.ts","./src/game/types.ts","./src/screens/home.tsx","./src/screens/overview.tsx","./src/screens/roundform.tsx"],"version":"5.9.3"}
