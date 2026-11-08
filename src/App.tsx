@@ -112,7 +112,7 @@ export default function App() {
   return (
     <div className="min-h-full pb-28">
       <header className="sticky top-0 z-30 border-b border-slate-200/60 bg-slate-100/80 backdrop-blur dark:border-white/10 dark:bg-slate-950/70">
-        <div className="mx-auto flex max-w-md items-center justify-between px-4 py-3">
+        <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
           <h1 className="text-xl font-extrabold tracking-tight">
             Cabo <span className="text-cabo-600">Score</span> 🦄
           </h1>
@@ -161,7 +161,7 @@ export default function App() {
 
       {/* Bottom action bar */}
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200/60 bg-slate-100/85 p-4 backdrop-blur dark:border-white/10 dark:bg-slate-950/80">
-        <div className="mx-auto flex max-w-md gap-3">
+        <div className="mx-auto flex max-w-2xl gap-3">
           <button
             className="btn-primary flex-1"
             disabled={!canEnterRound}
