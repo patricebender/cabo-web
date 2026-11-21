@@ -40,6 +40,11 @@ export const ResetIcon = (p: SVGProps<SVGSVGElement>) => (
     <path d="M3 3v5h5" />
   </svg>
 )
+export const ListIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}>
+    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+  </svg>
+)
 export const BackIcon = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base(p)}>
     <path d="M15 18l-6-6 6-6" />
