@@ -118,19 +118,6 @@ export default function App() {
           </h1>
           <div className="flex items-center gap-1">
             <button
-              className="relative rounded-xl p-2 text-slate-500 transition hover:bg-white hover:text-cabo-600 disabled:opacity-30 dark:hover:bg-white/10"
-              onClick={() => setScreen({ name: 'overview' })}
-              disabled={state.roundHistory.length === 0}
-              aria-label="Round overview"
-            >
-              <ListIcon />
-              {state.roundHistory.length > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-cabo-600 px-1 text-[10px] font-bold leading-none text-white">
-                  {state.roundHistory.length}
-                </span>
-              )}
-            </button>
-            <button
               className="rounded-xl p-2 text-slate-500 transition hover:bg-white hover:text-cabo-600 disabled:opacity-30 dark:hover:bg-white/10"
               onClick={() => setResetOpen(true)}
               disabled={state.roundHistory.length === 0}
@@ -181,6 +168,19 @@ export default function App() {
             onClick={() => setScreen({ name: 'entry' })}
           >
             Enter Round Scores
+          </button>
+          <button
+            className="btn-ghost relative !px-4"
+            disabled={state.roundHistory.length === 0}
+            onClick={() => setScreen({ name: 'overview' })}
+            aria-label="Round overview"
+          >
+            <ListIcon />
+            {state.roundHistory.length > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-cabo-600 px-1 text-[10px] font-bold leading-none text-white">
+                {state.roundHistory.length}
+              </span>
+            )}
           </button>
         </div>
         {!canEnterRound && (

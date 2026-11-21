@@ -9,15 +9,18 @@ function roundMin(round: RoundSummary): number {
   return real.length ? Math.min(...real) : 0
 }
 
-// Podium medal for a 0-based standing (0 = best). Only the top three place.
+// Rank marker for a 0-based standing (0 = best). Top three get podium medals;
+// everyone below gets a keycap number emoji (4️⃣, 5️⃣, …) matching their place.
+const KEYCAP = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
 function rankMedal(place: number): { emoji: string; label: string } | undefined {
-  return (
-    [
-      { emoji: '🥇', label: '1st place' },
-      { emoji: '🥈', label: '2nd place' },
-      { emoji: '🥉', label: '3rd place' },
-    ][place] ?? undefined
-  )
+  const medal = [
+    { emoji: '🥇', label: '1st place' },
+    { emoji: '🥈', label: '2nd place' },
+    { emoji: '🥉', label: '3rd place' },
+  ][place]
+  if (medal) return medal
+  const n = place + 1
+  return { emoji: KEYCAP[n] ?? `${n}.`, label: `${n}th place` }
 }
 
 // Leaderboard: players sorted by total (ascending — lowest wins in Cabo), each
