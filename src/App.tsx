@@ -7,15 +7,29 @@ import { Home } from './screens/Home'
 import { Overview } from './screens/Overview'
 import { RoundForm } from './screens/RoundForm'
 import { Modal } from './components/Modal'
-import { GearIcon, ListIcon, PlusIcon, ResetIcon } from './components/icons'
+import {
+  BackIcon,
+  GearIcon,
+  ListIcon,
+  PencilIcon,
+  PlusIcon,
+  ResetIcon,
+  TrashIcon,
+} from './components/icons'
 
-type Screen = { name: 'home' } | { name: 'entry' } | { name: 'overview' } | { name: 'edit'; index: number }
+type Screen = { name: 'home' } | { name: 'entry' } | { name: 'edit'; index: number }
 
 export default function App() {
   const game = useGame()
   const { state } = game
 
   const [screen, setScreen] = useState<Screen>({ name: 'home' })
+
+  // Overview is a content mode of Home, not a separate screen: the header and
+  // bottom bar persist; only the main content and the bottom bar's buttons swap.
+  const [overviewOpen, setOverviewOpen] = useState(false)
+  const [selectedRound, setSelectedRound] = useState(0)
+  const [deletingRound, setDeletingRound] = useState(false)
 
   // Modal state
   const [addOpen, setAddOpen] = useState(false)
@@ -67,7 +81,25 @@ export default function App() {
 
   function submitEdit(input: RoundInput) {
     if (screen.name === 'edit') game.editRound(screen.index, input)
-    setScreen({ name: 'overview' })
+    setScreen({ name: 'home' })
+    setOverviewOpen(true)
+  }
+
+  // Jump to overview, showing the given round (clamped to a valid index).
+  function openOverview(index: number) {
+    const last = state.roundHistory.length - 1
+    if (last < 0) return
+    setSelectedRound(Math.min(Math.max(index, 0), last))
+    setOverviewOpen(true)
+  }
+
+  function confirmDeleteRound() {
+    game.deleteRound(selectedRound)
+    setDeletingRound(false)
+    // Deleting shrinks history: close overview once empty, else keep selection valid.
+    const remaining = state.roundHistory.length - 1
+    if (remaining <= 0) setOverviewOpen(false)
+    else setSelectedRound((r) => Math.min(r, remaining - 1))
   }
 
   // --- Full-screen sub-views ------------------------------------------------
@@ -90,17 +122,10 @@ export default function App() {
         initial={editInitial}
         submitLabel="Save Changes"
         onSubmit={submitEdit}
-        onBack={() => setScreen({ name: 'overview' })}
-      />
-    )
-  }
-  if (screen.name === 'overview') {
-    return (
-      <Overview
-        state={state}
-        onBack={() => setScreen({ name: 'home' })}
-        onEditRound={(index) => setScreen({ name: 'edit', index })}
-        onDeleteRound={(index) => game.deleteRound(index)}
+        onBack={() => {
+          setScreen({ name: 'home' })
+          setOverviewOpen(true)
+        }}
       />
     )
   }
@@ -148,45 +173,100 @@ export default function App() {
       </header>
 
       <main className="py-4">
-        <Home
-          state={state}
-          averageScore={game.averageScore}
-          onEditPlayer={(id) => {
-            setEditingPlayer(id)
-            setEditName(playerName(id))
-          }}
-          onDeletePlayer={(id) => setDeletingPlayer(id)}
-        />
+        {overviewOpen ? (
+          <Overview state={state} index={selectedRound} />
+        ) : (
+          <Home
+            state={state}
+            averageScore={game.averageScore}
+            onEditPlayer={(id) => {
+              setEditingPlayer(id)
+              setEditName(playerName(id))
+            }}
+            onDeletePlayer={(id) => setDeletingPlayer(id)}
+          />
+        )}
       </main>
 
-      {/* Bottom action bar */}
+      {/* Bottom action bar. Two modes: Home shows Enter Round + Overview; the
+          overview mode shows a scrollable round picker above prominent round
+          actions (Edit / Delete) and a Back button. */}
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200/60 bg-slate-100/85 p-4 backdrop-blur dark:border-white/10 dark:bg-slate-950/80">
-        <div className="mx-auto flex max-w-2xl gap-3">
-          <button
-            className="btn-primary flex-1"
-            disabled={!canEnterRound}
-            onClick={() => setScreen({ name: 'entry' })}
-          >
-            Enter Round Scores
-          </button>
-          <button
-            className="btn-ghost relative !px-4"
-            disabled={state.roundHistory.length === 0}
-            onClick={() => setScreen({ name: 'overview' })}
-            aria-label="Round overview"
-          >
-            <ListIcon />
-            {state.roundHistory.length > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-cabo-600 px-1 text-[10px] font-bold leading-none text-white">
-                {state.roundHistory.length}
-              </span>
+        {overviewOpen ? (
+          <div className="mx-auto flex max-w-2xl flex-col gap-3">
+            {/* Round picker */}
+            <div className="flex gap-1.5 overflow-x-auto rounded-2xl bg-white/60 p-1.5 [scrollbar-width:none] dark:bg-white/5 [&::-webkit-scrollbar]:hidden">
+              {state.roundHistory.map((round, index) => (
+                <button
+                  key={round.id}
+                  className={`flex h-10 min-w-10 shrink-0 items-center justify-center rounded-xl text-lg font-bold tabular-nums transition ${
+                    index === selectedRound
+                      ? 'bg-cabo-600 text-white shadow'
+                      : 'text-slate-500 hover:bg-white dark:text-slate-300 dark:hover:bg-white/10'
+                  }`}
+                  onClick={() => setSelectedRound(index)}
+                  aria-label={`Show round ${index + 1}`}
+                  aria-current={index === selectedRound}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+            {/* Round actions */}
+            <div className="flex gap-3">
+              <button
+                className="btn-danger !px-4"
+                onClick={() => setDeletingRound(true)}
+                aria-label={`Delete round ${selectedRound + 1}`}
+              >
+                <TrashIcon width={18} height={18} />
+              </button>
+              <button
+                className="btn-primary flex-1"
+                onClick={() => setScreen({ name: 'edit', index: selectedRound })}
+              >
+                <PencilIcon width={18} height={18} />
+                Edit Round {selectedRound + 1}
+              </button>
+              <button
+                className="btn-ghost !px-4"
+                onClick={() => setOverviewOpen(false)}
+                aria-label="Back to standings"
+              >
+                <BackIcon />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="mx-auto flex max-w-2xl items-stretch gap-3">
+              <button
+                className="btn-primary flex-1"
+                disabled={!canEnterRound}
+                onClick={() => setScreen({ name: 'entry' })}
+              >
+                Enter Round Scores
+              </button>
+              <button
+                className="btn-ghost relative !px-4"
+                disabled={state.roundHistory.length === 0}
+                onClick={() => openOverview(state.roundHistory.length - 1)}
+                aria-label="Round overview"
+              >
+                <ListIcon />
+                {state.roundHistory.length > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-cabo-600 px-1 text-[10px] font-bold leading-none text-white">
+                    {state.roundHistory.length}
+                  </span>
+                )}
+              </button>
+            </div>
+            {!canEnterRound && (
+              <p className="mx-auto mt-2 max-w-md text-center text-xs text-slate-400">
+                Add at least 2 players to start a round.
+              </p>
             )}
-          </button>
-        </div>
-        {!canEnterRound && (
-          <p className="mx-auto mt-2 max-w-md text-center text-xs text-slate-400">
-            Add at least 2 players to start a round.
-          </p>
+          </>
         )}
       </nav>
 
@@ -272,6 +352,28 @@ export default function App() {
         <p className="text-slate-600 dark:text-slate-300">
           Delete <span className="font-semibold">{playerName(deletingPlayer)}</span>? This removes
           them from every round and cannot be undone.
+        </p>
+      </Modal>
+
+      {/* Delete round confirm */}
+      <Modal
+        open={deletingRound}
+        onClose={() => setDeletingRound(false)}
+        title={`Delete Round ${selectedRound + 1}`}
+        footer={
+          <>
+            <button className="btn-ghost flex-1" onClick={() => setDeletingRound(false)}>
+              Cancel
+            </button>
+            <button className="btn-danger flex-1" onClick={confirmDeleteRound}>
+              Delete
+            </button>
+          </>
+        }
+      >
+        <p className="text-slate-600 dark:text-slate-300">
+          Delete <span className="font-semibold">Round {selectedRound + 1}</span>? Later rounds are
+          renumbered and every total is recalculated. This cannot be undone.
         </p>
       </Modal>
 
