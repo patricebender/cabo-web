@@ -392,6 +392,9 @@ export default function App() {
               onClick={() => {
                 game.resetGame()
                 setResetOpen(false)
+                // Reset empties round history; overview has nothing to show.
+                setOverviewOpen(false)
+                setSelectedRound(0)
               }}
             >
               Reset
